@@ -10,6 +10,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          persist-credentials: true
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -31,3 +34,18 @@ jobs:
         with:
           name: avito-apartments
           path: output/avito_apartments.csv
+
+      - name: Configure Git
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+
+      - name: Commit and push CSV file
+        run: |
+          git add output/avito_apartments.csv
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "Update avito_apartments.csv - $(date +'%Y-%m-%d %H:%M:%S UTC')"
+            git push
+          fi
